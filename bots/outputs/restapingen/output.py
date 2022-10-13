@@ -35,7 +35,7 @@ class RestAPINgenOutputBot(OutputBot):
                 self.logger.error("No source address found in event, skipping.")
             else:
                 address = address.split("/")[0] # remove subnet mask if present, until ngen supports it
-        incident_feed = event_dict['feed.provider'].lower()
+        incident_feed = event_dict.get('feed.provider', '').lower()
 
         evidence = json.dumps(event_dict, indent=4)
 
@@ -50,6 +50,13 @@ class RestAPINgenOutputBot(OutputBot):
                     'Event has no attribute extra.ngen.type, used instead \
                         classification.identifier replacing spaces and score by underscore: {}.'.format(incident_type))
             elif "classification.taxonomy" in event_dict.keys():
+                incident_type = event_dict['classification.taxonomy'].replace(
+                    ' ', '_').replace('-', '_').lower()
+
+                self.logger.warn(
+                    'Event has no attribute extra.ngen.type or classification.identifier, used instead \
+                        classification.taxonomy replacing spaces and score by underscore: {}.'.format(incident_type))
+            elif "extra.csirtamericas.taxonomy" in event_dict.keys():
                 incident_type = event_dict['classification.taxonomy'].replace(
                     ' ', '_').replace('-', '_').lower()
 
